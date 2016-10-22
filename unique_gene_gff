@@ -1,0 +1,6 @@
+# get the current line number and continue to increment with each line
+# get the 4th field and add the number to the end of 'gene' (no space)
+# print everything else
+name='Bacteroides_vulgatus'
+
+awk -v FS='\t' -v OFS='\t' -v b=0 '{if ($3=="gene") {b=b+1;$3="gene"b;print$0;} else {print $0}}' ${name}.gff >> ${name}.gff2
