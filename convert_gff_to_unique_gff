@@ -1,0 +1,17 @@
+INPUT='comb_genomes'
+OUTPUT='comb_genomes2'
+mkdir $OUTPUT
+# for each file in the folder
+find $INPUT -type f > temp.txt
+# run the conversion tool
+while read name; do
+	# rename the file (remove the path prefix and file type suffix)
+	#name2=${OUTPUT}/${name: ((${#INPUT} + 1)): ((${#name} - 11 - ${#INPUT} - 1))}
+	name2=${OUTPUT}/${name: ((${#INPUT} + 1))}
+	# run the unique_gene
+	awk -v FS='\t' -v OFS='\t' -v b=0 '{if ($3=="gene") {b=b+1;$3="gene"b;print$0;} else {print $0}}' ${name} >> ${name2}
+done < temp.txt
+
+# unload the module
+rm temp.txt
+
