@@ -1,7 +1,7 @@
 # Usage: change the TARGET_DIR and other variables to accurately reflect your data (mostly paths and file endings)
 # scp to the public server from the local drive
 
-TARGET_DIR='/home/bdesilva/Project2/UCSC/5/'
+TARGET_DIR='/home/bdesilva/Project2/UCSC/6/'
 SFX='.fa' # suffix to check for
 
 # Create the description document
@@ -72,8 +72,34 @@ for FOLDER in $(basename -s $SFX $(find $TARGET_DIR*$SFX)); do
 	awk -v FS='\t' -v OFS='\t' '{if ($4~/cds/) {print $0}}' $PREFIX$BED >> ${PREFIX}_cds${BED} # grab only cds data
 	awk -v FS='\t' -v OFS='\t' '{if ($4~/gene/) {print $0}}' $PREFIX$BED >> ${PREFIX}_gene${BED} # grab only gene data
 	$UCSC'bedToBigBed' -tab ${PREFIX}_cds${BED} ${PREFIX}${CS} ${PREFIX}_cds${BB}
-	$UCSC'bedToBigBed' -tab ${PREFIX}_gene${BED} ${PREFIX}${CS} ${PREFIX}_gene${BB}
+	# if no output due to the end of genome bp # not working --> fix and try again
+#	if [ -z $(find ${PREFIX}* | grep _cds${BB}) ]; then 
+		# replace the bp fields with the final bp from the .chrom.sizes file
+#		MAX_BP=$(awk -v FS='\t' -v OFS='\t' '{print $2}' $PREFIX$CS)
+#		tail -n1 ${PREFIX}_cds${BED} | awk -v num=$MAX_BP '{$2=num-1; $3=num; print $0}' >> ${PREFIX}_cds${BED}
+#		$UCSC'bedToBigBed' -tab ${PREFIX}_cds${BED} ${PREFIX}${CS} ${PREFIX}_cds${BB}
+#		if [ -z $(find ${PREFIX}* | grep _cds${BB}) ]; then
+			# if attempt to create .bb fails
+			# remove the last line in place (method is efficient for large files)
+			# count bytes of last line of file, feed number of bytes into truncate to remove from file
+#			tail -n1 "${PREFIX}_cds${BED}" | wc -c | xargs -I {} truncate "${PREFIX}_cds${BED}" -s -{}
+#		fi
+#	fi
 
+	$UCSC'bedToBigBed' -tab ${PREFIX}_gene${BED} ${PREFIX}${CS} ${PREFIX}_gene${BB}
+	# if no output due to the end of genome bp # not working --> fix and try again
+#	if [ -z $(find ${PREFIX}* | grep _gene${BB}) ]; then
+		# replace the bp fields with the final bp from the .chrom.sizes file
+#		MAX_BP=$(awk -v FS='\t' -v OFS='\t' '{print $2}' $PREFIX$CS)
+#		tail -n1 ${PREFIX}_gene${BED} | awk -v num=$MAX_BP '{$2=num-1; $3=num; print $0}' >> ${PREFIX}_gene${BED}
+#		$UCSC'bedToBigBed' -tab ${PREFIX}_gene${BED} ${PREFIX}${CS} ${PREFIX}_gene${BB}
+#		if [ -z $(find ${PREFIX}* | grep _gene${BB}) ]; then
+			# if attempt to create .bb fails
+			# remove the last line in place (method is efficient for large files)
+			# count bytes of last line of file, feed number of bytes into truncate to remove from file
+#			tail -n1 "${PREFIX}_gene${BED}" | wc -c | xargs -I {} truncate "${PREFIX}_gene${BED}" -s -{}
+#		fi
+#	fi
 	# bgzip and tabix index the main vcf file
 	cp $PREFIX$VCF ${PREFIX}2${VCF}
 	$BGZIP $PREFIX$VCF
